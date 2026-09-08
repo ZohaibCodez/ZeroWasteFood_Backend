@@ -1,0 +1,17 @@
+name: Keep backend warm
+
+# Render's free tier spins the service down after ~15 min of no traffic,
+# causing the *next* request to take 15-40s to wake back up. Pinging /health
+# every 10 minutes keeps it warm during active hours so real users don't
+# eat that cold-start delay.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: curl -fsS --max-time 60 https://zerowastefood-backend.onrender.com/health
